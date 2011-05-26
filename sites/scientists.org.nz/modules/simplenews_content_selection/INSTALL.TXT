@@ -1,0 +1,13 @@
+######################################
+# Simplenews Content Selection usage #
+######################################
+
+1. Go to admin/settings/simplenews/content_selection and check the content types you want to enable them
+2. Go to admin/content/simplenews/content_selection to create a new newsletter
+
+########################################
+# Simplenews Content Selection theming #
+########################################
+
+Override function theme_simplenews_content_selection_newsletter_item to theme the output to the newsletter of the selected nodes. This function has one parameter $node. The parameter
+gives you access to the full node.

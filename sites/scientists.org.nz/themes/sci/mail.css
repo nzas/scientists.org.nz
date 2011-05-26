@@ -1,0 +1,17 @@
+@charset "utf-8";
+/* CSS Document */
+
+
+body {
+	font: 1em Verdana, Helvetica, sans-serif;
+	color: #666666;
+	margin: 0;
+	padding: 0 0 50px 0;
+	text-align: left;
+}
+h2 {
+font: 1.4em Verdana, Helvetica, sans-serif;
+} 
+h3 {
+font: 1.3em Verdana, Helvetica, sans-serif;
+} 

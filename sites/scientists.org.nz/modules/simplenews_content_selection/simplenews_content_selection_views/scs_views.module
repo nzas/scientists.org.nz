@@ -1,0 +1,78 @@
+<?php
+  //$Id: scs_views.module,v 1.1.2.1.2.1 2010/06/10 19:24:49 coworks Exp $
+  
+  /*
+   * @file
+   * Integrate Simplenews Content Selection with views and views bulk operations
+   */
+
+  /*
+   * Implementation of hook_menu
+   */
+  function scs_views_menu() {
+  	$items = array();
+  	
+  	$items['scs_views/nodeselected'] = array(
+  		'title' => 'Node selected in view',
+  		'page callback' => 'scs_views_node_selected',
+  		'access arguments' => array('access content'),
+  		'type' => MENU_CALLBACK,
+  	);
+  	
+  	return $items;
+  }
+
+  /*
+   * Implementation of hook_action_info()
+   */
+  function scs_views_action_info() {
+  	return array(
+  	  'scs_views_create_newsletter_action' => array(
+  	    'type' => 'node',
+        'description' => t('Create newsletter'),
+  	    'configurable' => false,
+  	    'behavior' => array('scs_views_create_newsletter'),
+  	  ),
+  	);
+  }
+  
+  /*
+   * Implementation of hook_form_alter()
+   */
+  function scs_views_form_alter(&$form, &$form_state, $form_id) {
+  	if (ereg('views_bulk_operations', $form_id)) {
+  		drupal_add_js(drupal_get_path('module', 'scs_views') . '/scs_views.js');
+  	}
+  }
+  
+  /*
+   * Get the selected nodes and create a newsletter from it
+   */
+  function scs_views_create_newsletter_action($node) {
+  	$nodes = $_SESSION['scs_nodes'];
+  	$nodes = explode('-', $nodes);
+  	unset($nodes[count($nodes) - 1]);
+  	
+  	$counter = 0;
+  	
+  	foreach ($nodes as $key=>$nid) {
+  		$nodes['nid_' . $counter] = $nid;
+  		unset($nodes[$key]);
+  		$counter++;	
+  	}
+
+  	$query = http_build_query($nodes, '', '&');
+  	drupal_goto('admin/content/scs_sort_nodes', $query);
+  }
+  
+  /*
+   * Ajax callback when a node is clicked in the view
+   */
+  function scs_views_node_selected() {
+  	$nodes = $_GET['nid'];
+  	
+  	unset($_SESSION['scs_nodes']);
+  	$_SESSION['scs_nodes'] = $nodes;
+  	
+  	print $_SESSION['scs_nodes'];
+  }

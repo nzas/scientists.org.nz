@@ -1,0 +1,23 @@
+? simplenews_digest-806636.patch
+Index: simplenews_digest.module
+===================================================================
+RCS file: /cvs/drupal-contrib/contributions/modules/simplenews_digest/simplenews_digest.module,v
+retrieving revision 1.1.4.3
+diff -u -p -r1.1.4.3 simplenews_digest.module
+--- simplenews_digest.module	23 Jul 2009 17:31:01 -0000	1.1.4.3
++++ simplenews_digest.module	25 May 2010 11:25:22 -0000
+@@ -425,10 +425,12 @@ function simplenews_digest_inject_node($
+     $node->changed = time();
+     $node->taxonomy = $newsletter_tid;
+ //    $node->send = 1;
+-    $node->s_format = variable_get('simplenews_digest_format', 'plain');
+     $node->priority = 0;
+     $node->receipt = 0;
+-    $node->simplenews = array('send' => SIMPLENEWS_COMMAND_SEND_NOW); // Necessary to send out the newsletter without further user interaction.
++    $node->simplenews = array(
++      'send' => SIMPLENEWS_COMMAND_SEND_NOW,  // Necessary to send out the newsletter without further user interaction.
++      's_format' => variable_get('simplenews_digest_format', 'plain')
++    );
+     node_save($node);
+   }
+ 

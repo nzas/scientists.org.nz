@@ -1,0 +1,113 @@
+***************
+*** 54,60 ****
+            }
+            // Over ride the default profile behavior. If a field is only available
+            // to "privileged users" unset the variable entirely. This affects
+-           // all themed versions 
+            elseif ($field->visibility == PROFILE_PRIVATE) {
+              $account->{$field->name} = NULL;
+              $account->content[$field->category][$field->name] = NULL;
+--- 54,60 ----
+            }
+            // Over ride the default profile behavior. If a field is only available
+            // to "privileged users" unset the variable entirely. This affects
++           // all themed versions
+            elseif ($field->visibility == PROFILE_PRIVATE) {
+              $account->{$field->name} = NULL;
+              $account->content[$field->category][$field->name] = NULL;
+***************
+*** 102,114 ****
+        break;
+      case 'profile_field_form':
+        $field = profile_privacy_get_field(NULL, $form['fid']['#value']);
+-   
+        $privacy_checkbox['profile_privacy'] = array(
+          '#type' => 'checkbox',
+          '#title' => t('Allow user to over ride default visibility'),
+          '#default_value' => $field->privacy,
+        );
+-       
+        $field_keys = array_flip(array_keys($form['fields']));
+        $form_first = array_slice($form['fields'], 0, $field_keys['visibility']+1);
+        $form_last = array_slice($form['fields'], $field_keys['visibility']+1);
+--- 102,114 ----
+        break;
+      case 'profile_field_form':
+        $field = profile_privacy_get_field(NULL, $form['fid']['#value']);
++ 
+        $privacy_checkbox['profile_privacy'] = array(
+          '#type' => 'checkbox',
+          '#title' => t('Allow user to over ride default visibility'),
+          '#default_value' => $field->privacy,
+        );
++ 
+        $field_keys = array_flip(array_keys($form['fields']));
+        $form_first = array_slice($form['fields'], 0, $field_keys['visibility']+1);
+        $form_last = array_slice($form['fields'], $field_keys['visibility']+1);
+***************
+*** 166,172 ****
+  
+  function theme_profile_privacy_category($form) {
+    drupal_add_css(drupal_get_path('module', 'profile_privacy') .'/profile_privacy.css');
+-   
+    $field_keys = element_children($form);
+    foreach ($field_keys as $field_key) {
+      $form['private_'. $field_key]['#attributes']['class'] = 'profile-privacy-checkbox';
+--- 166,172 ----
+  
+  function theme_profile_privacy_category($form) {
+    drupal_add_css(drupal_get_path('module', 'profile_privacy') .'/profile_privacy.css');
++ 
+    $field_keys = element_children($form);
+    foreach ($field_keys as $field_key) {
+      $form['private_'. $field_key]['#attributes']['class'] = 'profile-privacy-checkbox';
+***************
+*** 217,223 ****
+    if ($field_name) {
+      return $fields[$field_name];
+    }
+-   
+    foreach ($fields as $field) {
+      if ($field->fid == $fid) {
+        return $field;
+--- 217,223 ----
+    if ($field_name) {
+      return $fields[$field_name];
+    }
++ 
+    foreach ($fields as $field) {
+      if ($field->fid == $fid) {
+        return $field;
+***************
+*** 227,233 ****
+  
+  function profile_privacy_get_fields($category = NULL, $reset = FALSE) {
+    static $fields, $category_fields;
+-   
+    if (!isset($fields) || $reset) {
+      $fields = array();
+      $result = db_query('SELECT ppf.*, pf.* FROM {profile_fields} pf LEFT JOIN {profile_privacy_fields} ppf ON pf.fid = ppf.fid');
+--- 227,233 ----
+  
+  function profile_privacy_get_fields($category = NULL, $reset = FALSE) {
+    static $fields, $category_fields;
++ 
+    if (!isset($fields) || $reset) {
+      $fields = array();
+      $result = db_query('SELECT ppf.*, pf.* FROM {profile_fields} pf LEFT JOIN {profile_privacy_fields} ppf ON pf.fid = ppf.fid');
+***************
+*** 243,245 ****
+    return $fields;
+  }
+  
+--- 243,252 ----
+    return $fields;
+  }
+  
++ 
++ function profile_privacy_views_api() {
++   return array(
++     'api' => 2,
++     'path' => drupal_get_path('module', 'profile_privacy') . '/views',
++   );
++ }

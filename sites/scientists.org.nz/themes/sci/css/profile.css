@@ -1,0 +1,100 @@
+@charset "utf-8";
+/* CSS Document */
+
+
+#header {
+height:39px;
+}
+#header-main  {
+background:url("../images/header_small.gif") no-repeat scroll right bottom #FFFFFF;
+border-top:6px solid #5C4B45;
+height:51px;
+position:relative;
+top:-10px;
+}
+#header #nav {
+top: -2px;
+}
+#header #nav2 {
+top: 45px;
+right: 7px;
+}
+img.imagecache-userImage_profile {
+padding: 10px;
+}
+#content-wrapper {
+padding-top: 45px;
+}
+
+div.views-field-realname {
+
+font-size: 2em;
+font-weight: bold;
+padding: 20px 0 10px 0px;
+margin: 0;
+}
+div.views-field-picture {
+float:right;
+top: 0px;
+width: 200px;
+}
+/* =profile page
+--------------------------------------------------------------------------------*/
+div#intro {
+border: solid 1px #CCCCCC;
+margin: 10px;
+min-height: 240px;
+padding: 20px;
+}
+div#about {
+border: none;
+margin: 10px;
+padding: 20px;
+}
+label.views-label-intro, label.views-label-about, label.views-label-about-end, label.views-label-pic{
+display:none;
+}
+#profile #profile_more {
+padding-left: 10px;
+}
+div#intro .views-field-realname {
+font-size: 2em;
+display:inline;
+font-weight: bold;
+padding: 20px 0 30px 0px;
+margin: 0;
+}
+div#intro .views-field-value-7 {
+display:inline;
+font-size: 1em;
+font-weight: normal;
+padding: 6px 0px 20px 0px;
+margin: 0;
+}
+div#intro div#Affiliation {
+padding-top: 20px;
+}
+div#intro div#Affiliation, div#intro div#Position, div#intro div#Institutional webpage {
+font-size: 1em;
+}
+#profile #profile_pic {
+float:right;
+top: 0px;
+}
+#profile_mem {
+padding: 20px 0 10px 10px;
+}
+form#user-profile-form div#edit-newsletters-1-wrapper, form#user-register fieldset.fieldset-newsletter {
+display:none;
+}
+div.views-field-value-5 div.field-content {
+margin: -27px 0 0 115px;
+}
+div#pic {
+float:right;
+width: 204px;
+text-align:right;
+}
+div.views-field-phpcode-7 {
+display:none;
+}

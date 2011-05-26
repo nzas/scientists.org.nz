@@ -1,0 +1,415 @@
+<?php
+// $Id: simplenews_roles.module,v 1.2.2.4.2.10 2010/01/14 13:21:21 joachim Exp $
+
+/**
+ * @file
+ * Simplenews Roles module
+ *
+ * Keeps a mailing list subscription in sync with a role.
+ * Needs to sync on:
+ * - user role change (but just that user)
+ * - newsletter role change (whole newsletter)
+ * - 
+ *
+ * Variables:
+ * - simplenews_roles_tids_rids
+ *   An array whose keys are tids of newsletters this module is concerned with.
+ *   If a newsletter tid does not have a key here, we ignore it completely.
+ *   The values of this array are arrays of role IDs (by value).
+ *   Example: newsletter 4 is synced to roles 8 and 9:
+ *     4 => array(8, 9)
+ * - simplenews_roles_need_sync
+ *   Flags whether synchronization of newsletter subscriptions is needed.
+ *   This avoids doing this every single cron run.
+ */
+ 
+ 
+/**
+ * Implementation of hook_help().
+ */
+function simplenews_roles_help($path, $arg) {
+  switch ($path) {
+    case 'admin/help#simplenews_roles':
+      return t('Simplenews roles keeps subscriptions to particular newsletters synchronized with one or more roles. Enable roles in the options for <a href="@newsletters">each newsletter</a>.', array('@newsletters' => url('admin/content/simplenews/types')));
+  }
+}
+
+/**
+ * Implementation of hook_init().
+ */
+function simplenews_roles_init() {
+  module_load_include('module', 'simplenews', 'simplenews');
+}
+
+/**
+ * Implementation of hook_cron().
+ */
+function simplenews_roles_cron() {
+  // Only sync if it's been requested.
+  if (variable_get('simplenews_roles_need_sync', FALSE)) {
+    foreach(variable_get('simplenews_roles_tids_rids', array()) as $tid => $rids) {
+      simplenews_roles_update_subscriptions($tid, $rids);
+    }
+    // Reset sync request.
+    variable_set('simplenews_roles_need_sync', FALSE);
+  }
+}
+
+/**
+ * Implementation of hook_form_FORM_ID_alter().
+ *
+ * Add our settings to the newsletter settings page.
+ */
+function simplenews_roles_form_simplenews_admin_types_form_alter(&$form, $form_state) {
+  if (!empty($form['tid']['#value'])) {
+    $form['#submit'][] = 'simplenews_roles_newsletter_submit';
+    $role_newsletters = variable_get('simplenews_roles_tids_rids', array());
+
+    $form['simplenews_roles'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Role synchronization'),
+      '#collapsible' => FALSE,
+      '#description' => t('This newsletter subscription list will consist of only users in the selected roles. This newsletter subscription is automatically syncronized so any users manually added to this list will be removed if they are not in any of the selected roles.'),
+    );
+    $form['simplenews_roles']['roles'] = array(
+      '#type' => 'checkboxes',
+      '#title' => t('Automatically subscribe users in the following roles to this newsletter'),
+      '#options' => user_roles(TRUE),
+      '#default_value' => isset($role_newsletters[$form['tid']['#value']]) ? $role_newsletters[$form['tid']['#value']] : array(),
+      '#weight' => 10,
+    );
+  }
+}
+
+/**
+ * Forms API callback; additional submit handler for newsletter form.
+ */
+function simplenews_roles_newsletter_submit($form, &$form_state) {
+  $role_newsletters = variable_get('simplenews_roles_tids_rids', array());
+  
+  $tid = intval($form_state['values']['tid']);
+  $roles = $form_state['values']['roles'];
+  
+  $roleids = array();
+  foreach($roles as $roleid => $checked) {
+    if ($checked == $roleid) {
+      $roleids[] = $roleid;
+    }
+  }
+  
+  if (count($roleids) > 0) {
+    $role_newsletters[$tid] = $roleids;
+    // Newsletter has roles: request a sync.
+    // TODO: sync just this NL.
+    variable_set('simplenews_roles_need_sync', TRUE);
+
+  }
+  elseif (isset($role_newsletters[$tid])) {
+    unset($role_newsletters[$tid]);
+  }
+  
+  variable_set('simplenews_roles_tids_rids', $role_newsletters);
+}
+
+/**
+ * Tests needed here:
+ * - a synced newsletter is removed from both forms
+ *   at user/X/edit/newsletter and newsletter/subscriptions
+ * - when all newsletters are synced, a different message is shown
+ * - admin user gets the same filtering when looking at a non-admin user's
+ *   user/X/edit/newsletter
+ */
+
+/**
+ * Implementation of hook_form_FORM_ID_alter()
+ *  for simplenews_subscription_manager_form
+ *
+ * General subscription form: remove newsletters that are under our control
+ * if the user does not have access to them.
+ */
+function simplenews_roles_form_simplenews_subscription_manager_form_alter(&$form, $form_state) {  
+  _simplenews_roles_form_alter_subscriptions($form['subscriptions']);
+
+  // If this leaves us with no tids at all, then change the whole form
+  if (count($form['subscriptions']['newsletters']['#options']) == 0) {
+    unset($form['subscribe']);
+    unset($form['unsubscribe']);
+    unset($form['subscriptions']);
+    $form['notice'] = array(
+      '#value' => 'There are no newsletters you can subscribe to at this time.',
+    );
+  }
+}
+
+/**
+ * Implementation of hook_form_FORM_ID_alter()
+ *  for user_profile_form
+ *
+ * Filter newsletters on the user profile form.
+ */
+function simplenews_roles_form_user_profile_form_alter(&$form, $form_state) {
+  if ($form['_category']['#value'] == 'newsletter') {
+     _simplenews_roles_form_alter_subscriptions($form['subscriptions'], $form['_account']['#value']);
+     
+    // If this leaves us with no tids at all, then change the whole form
+    if (count($form['subscriptions']['newsletters']['#options']) == 0) {
+      unset($form['submit']);
+      unset($form['subscriptions']);
+      $form['notice'] = array(
+        '#value' => 'There are no newsletters you can subscribe to at this time.',
+      );
+    }
+  }
+}
+
+/**
+ * Helper function for form_alter.
+ *
+ * Removes newsletters from several subscriptions forms.
+ *
+ * @param $form
+ *  The 'subscriptions' array from the form.
+ */
+function _simplenews_roles_form_alter_subscriptions(&$form, $account = NULL) {
+  $tids = simplenews_roles_filter_tids(array_keys($form['newsletters']['#options']), $account);
+  foreach (array_keys($form['newsletters']['#options']) as $tid) {
+    if (!in_array($tid, $tids)) {
+      unset($form['newsletters']['#options'][$tid]);
+    }
+  }  
+}
+
+/**
+ * Helper function to filter tids the user has access to.
+ *
+ * A user should not have access to newsletters that are synced to a role 
+ * they do not have.
+ *
+ * @param $tids
+ *  An array of newsletter $tids to filter.
+ * @param $account
+ *  (optional) A user account to consider. Defaults to the current user.
+ */
+function simplenews_roles_filter_tids($tids, $account = NULL) { 
+  $role_newsletters = variable_get('simplenews_roles_tids_rids', array());
+  
+  if ($account) {
+    $roles = array_keys($account->roles);
+  }
+  else {
+    global $user;
+    $roles = array_keys($user->roles);
+  }
+    
+  // Iterate on the tids even though it's a longer array
+  // as it's a lot harder to unset array items by value
+  // than to build an array of passes.
+  // This does need cleaning up to something more elegant though!
+  $passed_tids = array();
+  foreach ($tids as $tid) {
+    // It's a tid we have something to say about:
+    if (is_array($role_newsletters[$tid])) {
+      if (count(array_intersect($role_newsletters[$tid], $roles)) != 0) {
+        $passed_tids[] = $tid;
+      }
+    }
+    // It's a tid we don't do anything with:
+    else {
+      $passed_tids[] = $tid;      
+    }
+  }
+  
+  return $passed_tids;
+}
+
+/**
+ * Implementation of hook_nodeapi().
+ */
+function simplenews_roles_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
+  if (in_array($node->type, variable_get('simplenews_content_types', array('simplenews')))) {
+    switch ($op) {
+      case 'insert':
+      case 'update':
+        // Strip out non-Simplenews terms from taxonomy for posterity.
+        $term = simplenews_validate_taxonomy($node->taxonomy);
+        $tid = is_array($term) ? array_shift(array_values($term)) : 0;
+
+        $role_newsletters = variable_get('simplenews_roles_tids_rids', array());
+        if (isset($role_newsletters[$tid])) {
+          //simplenews_roles_update_subscriptions($tid, $role_newsletters[$tid]);
+          // TODO
+          // Why do we need to sync here?
+        }
+        break;
+    }
+  }
+}
+
+/**
+ * Implementation of hook_user().
+ */
+function simplenews_roles_user($op, &$edit, &$account, $category = NULL) {
+  switch ($op) {
+    case 'after_update':
+    case 'insert':
+      $newroles = array();
+      // this array is not always set for all operations, hence the check
+      if ( is_array($edit['roles']) )
+        $newroles = array_keys($edit['roles']);
+      $oldroles = isset($account->roles) ? array_keys($account->roles) : array();
+      $roles = array_unique(array_merge($newroles, $oldroles, array(DRUPAL_AUTHENTICATED_RID)));
+     
+      foreach(variable_get('simplenews_roles_tids_rids', array()) as $tid => $rids) {
+      	if (count(array_intersect($rids, $roles)) > 0) {
+          // if there are "new" roles for the user for this newsletter, then sync the user
+          //simplenews_roles_update_subscriptions($tid, $rids);
+          // TODO: sync func for one user.
+          // Request a sync.
+          variable_set('simplenews_roles_need_sync', TRUE);
+      	}
+        else {
+         // if the user has no role that matches the current subscription, unsubscribe
+         simplenews_unsubscribe_user($account->mail, $tid, FALSE, 'simplenews_roles');
+        }
+      }
+      break;
+  }
+}
+
+/**
+ * API function; clears subscription list for specified newsletter and replaces
+ * it with users from the specified roles.
+ *
+ * This function should probably be only run on cron.
+ * It may well need better optimising.
+ *
+ * @param $tid
+ *  The newsletter id (ie term id) to update.
+ * @param $rids
+ *  An array of role ids.
+ */
+function simplenews_roles_update_subscriptions($tid, $rids) {
+  $rids_string = implode(', ', $rids);
+
+ /*
+  the rules are: 
+    - a: we can change status from 1 to 0 in all cases
+      (we may unsub anybody) 
+    - b: we can only change status from 0 to 1 if we are the source of the 0
+      (we can't resub users who unsubbed manually.)
+      (this accounts for role changes)
+    - c: we can add subs if status doesn't exist.
+   
+   the steps:
+    - 0
+    delete the snids for anon users.
+    
+    - 1
+    unsubscribe if user doesn't have role 
+    
+    - 2
+    subscribe all from role who are either unknown to SN, or who were
+    previously unsubscribed by ourselves (eg due to a user losing then
+    regaining a role).
+  */ 
+  
+  /** 
+   * step 0:
+   * remove anon users
+   *
+   * skip this step: it breaks simpletest.
+   * (cookie if you can tell me why!)
+   * and if you intend to have a synced newsletter you really should keep
+   * anon users out of it.
+   */
+  $query_0 = "
+    DELETE {simplenews_snid_tid}
+    FROM 
+      {simplenews_snid_tid} snst
+    JOIN 
+      {simplenews_subscriptions} sns
+      ON snst.snid = sns.snid
+    WHERE
+      snst.tid = %d /* $tid */
+    AND
+      sns.uid = 0";
+  
+  // Just delete these. They're not interesting.
+  // Why does this break simpletest?
+  //db_query($query_0, $tid);
+  
+  /**
+   * step 1: 
+   * remove users who are not in the role(s)
+  */
+  $query_1 = "
+    SELECT sns.mail 
+    FROM 
+      {simplenews_snid_tid} snst 
+    JOIN 
+      {simplenews_subscriptions} sns
+      ON snst.snid = sns.snid
+    JOIN 
+      {users} u
+      ON sns.uid = u.uid 
+    LEFT JOIN /* LEFT JOIN because we want the NULLs */
+      {users_roles} ur 
+      ON 
+        u.uid = ur.uid 
+      AND 
+        ur.rid IN (%s) /* $rids_string */
+    WHERE 
+      snst.tid = %d   /* $tid */
+    AND    
+      ur.uid IS NULL
+    ";
+      
+  $mails_1 = db_query($query_1, $rids_string, $tid);
+  while ($mail = db_result($mails_1)) {
+    // Call SN API to unsub users.
+    simplenews_unsubscribe_user($mail, $tid, FALSE, 'simplenews_roles');
+  }
+  
+  /**
+   * step 2: 
+   * add users who are in the role(s), and not subscribed
+   * but only if the prior source of unsubscription is ourselves
+   * In other words, if the source of their unsub is 'website', say
+   * we don't touch it.
+   */
+  $query_2 = "
+    SELECT u.mail
+    FROM
+      {users} u
+    JOIN
+      {users_roles} ur 
+      ON 
+        u.uid = ur.uid 
+      AND 
+        ur.rid IN (%s) /* $rids_string */
+    LEFT JOIN /* LEFT JOIN because we want the NULLs */
+    (
+      {simplenews_snid_tid} snst 
+    JOIN 
+      {simplenews_subscriptions} sns
+      ON 
+        snst.snid = sns.snid
+      AND
+        snst.tid = %d   /* $tid */
+    )
+    ON
+      u.uid = sns.uid
+    WHERE
+      sns.snid IS NULL /* those that don't exist at all for this tid or for SN as a whole */
+      OR
+      snst.source = 'simplenews_roles' /* those we unsubbed ourselves previously */
+  ";
+
+  $mails_2 = db_query($query_2, $rids_string, $tid);
+  while ($mail = db_result($mails_2)) {
+    // Call SN API to sub users.
+    simplenews_subscribe_user($mail, $tid, FALSE, 'simplenews_roles');
+  }
+  
+  watchdog('newsletter', t('Newsletter subscription list was synchronized to roles.'));
+}

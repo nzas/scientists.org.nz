@@ -1,0 +1,94 @@
+--- watcher.module.original	2009-07-12 11:17:24.000000000 +0100
++++ watcher.module	2010-02-15 15:26:08.000000000 +0000
+@@ -153,9 +153,11 @@ function theme_watcher_node_toggle_watch
+       'attributes' => array(
+         'class' => "watcher_node_toggle_watching_link$class_watch_status_link",
+         'title' => ( $user_is_watching ? $t['watch_toggle_enabled_title'] : $t['watch_toggle_disabled_title'] ),
+-  ))
++  ),
++      'html' => TRUE)
+   );
+ 
++
+   $output .= '</div>';
+ 
+   return $output;
+@@ -731,6 +733,13 @@ function _watcher_admin_settings_watch_t
+       '#description' => t('Determines whether or not to show the "watch this post" toggle link in node teasers (used on front page and content listings). Teasers are the shortened down version of a node, often shown on a site\'s frontpage or on pages that summarize content. If disabled, link will only be shown when nodes are shown as pages (full view).'),
+       '#default_value' => variable_get('watcher_toggle_link_in_teaser', false),
+   );
++
++  $form['togglelink']['watcher_toggle_link_in_template'] = array(
++      '#type' => 'checkbox',
++      '#title' => t('I will place "watch this post" toggle link in template file myself.'),
++      '#description' => t('Using this option you can place manually "watch this post" toggle link somewhere in your template file i.e. in node.tpl.php or node-story.tpl.php. Please use this code to make it happen "<?php global $watcherlink; print $watcherlink;?>"'),
++      '#default_value' => variable_get('watcher_toggle_link_in_template', false),
++  );
+ }
+ 
+ /**
+@@ -784,6 +793,12 @@ function _watcher_admin_settings_persona
+         '#title' => t('Display Post Author Column'),
+         '#default_value' => variable_get('watcher_display_post_author', 1),
+   );
++
++  $form['display']['posts_table']['watcher_display_post_added'] = array(
++        '#type' => 'checkbox',
++        '#title' => t('Display Post Added Column'),
++        '#default_value' => variable_get('watcher_display_post_added', 1),
++  );
+ }
+ 
+ /**
+@@ -1331,17 +1346,20 @@ function _watcher_binder($account) {
+   }
+ 
+   // time post was added to watched list
++  if (variable_get('watcher_display_post_added', true)) {
+   $header[] = array(
+     'data' => t('Post Added'),
+     'field' => 'wn.added',
+-    'sort' => 'desc',
++    //'sort' => 'desc',
+   );
++  }
+ 
+   // last post updated time
+   if (variable_get('watcher_display_last_updated', 0)) {
+     $header[] = array(
+       'data' => t('Last updated'),
+       'field' => 'last_updated',
++    'sort' => 'desc',
+     );
+   }
+ 
+@@ -1390,7 +1408,9 @@ function _watcher_binder($account) {
+     }
+ 
+     // Post added
++    if (variable_get('watcher_display_post_added', 0)) {
+     $row[] = ($node->added ? t('!time ago', array('!time' => format_interval(time() - $node->added))) : null );
++    }
+ 
+     // Post last updated
+     if (variable_get('watcher_display_last_updated', 0)) {
+@@ -2198,11 +2218,18 @@ function _watcher_node_watch_link(&$node
+   // Add CSS
+   drupal_add_css(drupal_get_path('module', 'watcher') .'/css/watcher.css');
+ 
+-  //Add element to node
++  //Add element to node or use option to place it manually in tpl file
++
++  if (variable_get('watcher_toggle_link_in_template', true)) {
++    global $watcherlink;
++    $watcherlink = theme('watcher_node_toggle_watching_link', $user->uid, $node->nid, $dest, $watching, $tstrings);
++  }
++  else {
+   $node->content['watcher'] = array(
+     '#value' => theme('watcher_node_toggle_watching_link', $user->uid, $node->nid, $dest, $watching, $tstrings),
+     '#weight' => 30,
+   );
++  }
+ }
+ 
+ /**

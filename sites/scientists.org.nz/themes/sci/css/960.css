@@ -1,0 +1,968 @@
+	/* $Id: 960.css,v 1.1.4.1 2009/08/05 18:55:54 add1sun Exp $ */
+/*
+	960 Grid System ~ Core CSS.
+	Learn more ~ http://960.gs/
+	modified by e.w for scientists.org.nz
+
+	Licensed under GPL and MIT.
+*/
+/* =user reg
+--------------------------------------------------------------------------------*/
+form#user-register label, form#user-login label {
+width: 150px;
+float:left;
+}
+
+form#user-register input, form#user-login input {
+width: 430px;
+margin: 0;
+}
+form#user-register input#edit-profile-personalcontact-hide {
+width:30px;
+}
+div#edit-profile-personalcontact-hide-wrapper label {
+font-weight:bold;
+margin-left: 10px;
+}
+div#edit-profile-personalcontact-hide input {
+width: 20px;
+}
+div#edit-profile-personalcontact-hide .description {
+padding: 0 20px 0 20px;
+}
+
+form#user-register div.description, form#user-login div.description {
+margin-top: 5px;
+margin-left: 150px;
+}
+form#user-register div.description label, form#user-login div.description label{
+margin-top: 5px;
+float:none;
+}
+form#user-register div.description div.form-item, form#user-login div.description div.form-item {
+}
+form#user-register div.description label.option input {
+width: 20px;
+}
+form#user-register div.resizable-textarea {
+width: 430px;
+margin: 0 0 0 150px;
+}
+form#user-register div.resizable-textarea div.grippie {
+display: none;
+}
+
+form#user-register div.captcha img {
+margin-left: 150px;
+}
+
+
+/* =profile edit
+--------------------------------------------------------------------------------*/
+
+form#user-profile-form label {
+width: 200px;
+float: left;
+}
+form#user-profile-form select, form#user-profile-form input, form#user-profile-form input.form-text{
+float: left;
+width: 380px;
+}
+form input#edit-contact, form input#edit-profile-personalcontact-hide  {
+width: 18px;
+float: right;
+}
+form#user-register input#edit-submit, form#user-login input#edit-submit {
+font-size: 1.5em;
+font-weight:bold;
+margin-left: 150px;
+}
+
+form#user-profile-form .description  {
+margin-left: 200px;
+clear:both;
+}
+
+form#user-profile-form #edit-profile-personalcontact-hide-wrapper label {
+margin: 0;
+}
+form#user-profile-form #edit-profile-personalcontact-hide-wrapper .description {
+clear:both;
+}
+form#user-profile-form  .description {
+clear:both;
+}
+form#user-profile-form .resizable-textarea {
+margin-left: 200px;
+width: 380px;
+}
+
+form#user-profile-form .biblio, form#user-profile-form .mimemail {
+display: none;
+}
+
+div#edit-newsletters-28-wrapper,div#edit-newsletters-12-wrapper  ,div#edit-newsletters-45-wrapper  {
+width: 300px;
+}
+
+div#edit-newsletters-28-wrapper .input {
+width: 20px;
+}
+/* =pagers
+--------------------------------------------------------------------------------*/
+ul.custom-pager-bottom {
+margin: 20px 0 100px 75%;
+}
+/* =node author block
+--------------------------------------------------------------------------------*/
+div.view-node-author div.views-field-name span.field-content a 	{
+font-size: 1.5em;
+font-weight:bold;
+}
+/* =dicussion filter & header
+--------------------------------------------------------------------------------*/
+div.view-recentPosts div.view-header {
+padding: 0 8px 0 0;
+top: 0px;
+position:relative;
+}
+
+div.view-recentPosts div.view-filters form {
+padding: 0 5px 0 5px;
+margin: 0px;
+position:relative;
+z-index: 10;
+}
+div.view-recentPosts div.view-filters form div.views-widget {
+float: right;
+}
+div.view-recentPosts div.view-filters form div.views-widget select {
+padding: 0;
+margin:0 0 0 5px;
+}
+div.view-recentPosts div.view-filters form div.views-exposed-widget input {
+padding: 0;
+margin:0 0 0 5px;
+}
+div.view-recentPosts div.view-addposts {
+margin: -28px 10px 0 0 ;
+}
+
+/* =recent news footer on home 
+----------------------------------*/
+div#block-views-recentPosts-block_2 div.view-dom-id-1 {
+margin: 10px 30px 0 20px;
+}
+div.view-recentPosts div.views-field-title {
+font-size: 1.4em;
+font-family: Georgia,'Times New Roman',Times,serif;
+font-weight:bold;
+margin-top:25px;
+}
+div.views-field-view-node {
+float:right;
+background:url("../images/import.gif") 10px 1px;
+background-repeat:no-repeat;
+padding: 0 26px 0px 32px ;
+margin: -6px 0 0 auto;
+}
+
+/* =misc
+--------------------------------------------------------------------------------*/
+
+/** ck editor center  **/
+
+body.cke_show_borders {
+text-align: left;
+}
+.password-description warning { 
+position: absolute;
+    left: -9999px;
+}
+div.more-link {
+padding-right: 10px;
+}
+
+#comments div.comment {
+background:url("../images/comment-icon.jpg") 9px 18px;
+background-repeat:no-repeat;
+padding: 0 48px 20px 48px ;
+  list-style: none;
+  border-bottom: 1px solid #F0F0F0;
+  
+}
+
+div#content-output div.membership-join {
+background:url("../images/join.gif") 6px 12px;
+background-repeat:no-repeat;
+padding: 0 60px 0 60px ;
+margin: 30px;
+}
+
+div#content-output div.membership-join p {
+margin: 10px;
+}
+#imagepicker div#main {
+width :395px;
+}
+.imgp_img, #content-wrapper div.post img {
+margin: 10px;
+}
+div.view-editMembers td.views-field-picture, div.view-editMembers td.views-field-picture img.imagecache imagecache-userImage_mini {
+padding: 0px;
+margin: 0px;
+}
+div.view-editMembers td.views-field-picture, div.view-editMembers img.imagecache-userImage {
+padding: 0px;
+margin: 0px;
+}
+div.content img.imagecache-post_imageSmall, div.content img.imagecache-post_imageMed {
+float:right;
+}
+div#edit-field-postimage-0-upload-wrapper .form-item .description {
+display:inline;
+}
+/* publicaiton download link 
+-------------------------------------------------*/
+div.view-myPublicationsBlock span.views-field-upload-fid {
+}
+div.view-myPublicationsBlock span.views-field-upload-fid #pdflink {
+border: 0px;
+}
+/* login block 
+-------------------------------------------------*/
+form#user-login-form {
+margin: 0px;
+padding: 5px;
+}
+form#user-login-form .form-item label {
+width: 120px;
+}
+form#user-login-form .form-item label input#edit-name {
+width: 100px;
+}
+
+/* nav user block
+--------------------------------------------------------------------------------*/
+#header #nav2 {
+right:0;
+margin:0;
+padding:0;
+position:absolute;
+top:60px;
+}
+#header #nav2 .myprofile {
+float:left;
+}
+/* sidebar block formatting
+--------------------------------------------------------------------------------*/
+div#block-text_resize-0 {
+position:absolute;
+top:106px;
+padding-left:166px;
+display: none; /*EA: Hide text resize */
+}
+a#text_resize_increase {
+margin:9px 0 0 3px;
+}
+a#text_resize_increase {
+width: 22px;
+}
+
+div#sidebars div#loginblock {
+margin: 0px;
+position: absolute;
+top: 78px;
+}
+
+div#sidebars div#loginblock div {
+font-family: Georgia,'Times New Roman',Times,serif;
+font-size: 1.6em;
+font-weight: bold;
+height: 40px;
+padding: 17px 8px 0 62px;
+margin: 4px 0 0px 2px;
+
+}
+div#sidebars div#loginblock div#join {
+background:url("../images/join.gif") 1px 2px;
+background-repeat:no-repeat;
+}
+div#sidebars div#loginblock div#login {
+color:#80c026;
+background:url("../images/in.gif") 1px 2px;
+background-repeat:no-repeat;
+}
+div#sidebars div#loginblock div#login a {
+color:#80c026;
+}
+div#sidebars div.view-comments-recent div.views-row {
+padding: 0 8px 0 21px;
+background:url("../images/comment.gif");
+background-repeat:no-repeat;
+margin: 4px 0 0px 2px;
+}
+
+div#sidebars div.view-Newsletters div.views-row {
+padding: 0 8px 0 21px;
+background:url("../images/newsletter.gif") 1px 2px;
+background-repeat:no-repeat;
+margin: 4px 0 0px 2px;
+}
+div#sidebars div.view-newMembers div.view-footer {
+padding: 0 4px 0 4px;
+/*background:url("../images/members.gif") 1px 2px;*/
+background-repeat:no-repeat;
+margin: 4px 0 0px 2px;
+}
+div#sidebars div.view-PressReleasesBlock div.views-row {
+padding: 0 8px 0 21px;
+background:url("../images/press.gif");
+background-repeat:no-repeat;
+margin: 4px 0 0px 2px;
+}
+
+div.block-views  table.views-view-grid td{
+border: none;
+vertical-align:middle;
+text-align: center;
+}
+
+div#sidebars div.view-tweets div.view-content li	 {
+padding: 0 8px 0 21px;
+background:url("../images/tweet.gif");
+background-repeat:no-repeat;
+margin: 4px 0 0px 2px;
+}
+div#sidebars div.view-Awards div.views-row {
+padding: 0 8px 0 21px;
+background:url("../images/award.gif");
+background-repeat:no-repeat;
+margin: 4px 0 0px 2px;
+}
+div#sidebars div.view-PolicySubmissions div.views-row {
+padding: 0 8px 0 21px;
+background:url("../images/poly.gif");
+background-repeat:no-repeat;
+margin: 4px 0 0px 2px;
+}
+div#sidebars div.view-Publications div.views-row, div.view-myPublicationsBlock div.views-row, 
+div.view-RecentPublications div.views-row {
+padding: 0 8px 0 21px;
+background:url("../images/pubs.gif") 0 3px;
+background-repeat:no-repeat;
+margin: 4px 0 0px 2px;
+}
+div.view-myPublicationsBlock div.views-row {
+margin: 4px 0 12px 2px;
+}
+div#sidebars div.view-newMembers div.views-row {
+padding: 0 4px 0 4px;
+/*background:url("../images/user.gif");*/
+background-repeat:no-repeat;
+margin: 4px 0 0px 2px;
+}
+div#sidebars div.view-recentPosts div.views-row {
+padding: 0 8px 0 21px;
+background:url("../images/post.gif");
+background-repeat:no-repeat;
+margin: 4px 0 0px 2px;
+}
+/* journal table views
+--------------------------------------------------------------------------------*/
+div.view-Journals td {
+width:  25%;
+text-align: center;
+}
+div.view-Journals td div.views-field-title {
+padding-bottom: 5px;
+}
+/* imagery addons
+--------------------------------------------------------------------------------*/
+div#addpost {
+background:url("../images/add.gif");
+background-repeat:no-repeat;
+margin: 4px 0 0px 10px;
+float:right;
+z-index: 15;
+position:relative;
+}
+div#addpost a {
+font-weight: normal;
+padding-left:20px;
+}
+div#import {
+background:url("../images/import.gif");
+background-repeat:no-repeat;
+margin: 4px 0 0px 10px;
+float:right;
+}
+div#import a {
+font-weight: normal;
+padding-left:20px;
+}
+div#clearme {
+float:none;
+clear:both;
+}
+div.view-MemberContribute div#addpost, div.view-MemberContribute div#import {
+width:90%;
+float:left;
+margin-right: 5px;
+
+}
+ul.secondary-links {
+display: inline;
+}
+/**
+ * Toggle watching link on nodes
+ */
+.watcher_node {
+  background-image: url("../images/unwatch.gif");
+  background-repeat: no-repeat!important;
+  background-position: 0% 50%;
+  padding-right: 22px;
+  padding-top: 0px;
+  padding-bottom: 3px;
+  margin: 0;
+  height: 18px;
+    font-size: 11px;
+	float:right;
+}
+
+.watcher_node_watched {
+  background-image: url("../images/watch.gif")!important;
+}
+
+.watcher_node_toggle_watching_link {
+  display: inline;
+		color: #346199!important;
+		font-weight: normal;
+}
+
+.watcher_node_toggle_watching_link_watched {
+  color: #346199!important;
+  	font-weight: normal;
+}
+
+.watcher_node_toggle_watching_link_with_link_to_binder {
+  padding-left: 15px;
+  margin-bottom: 0px;
+	  display:inline;
+	  position:relative;
+	  float:right;
+	  font-weight:bold;
+
+}
+
+
+.watcher_node_help_link_to_binder {
+  font-family: "Lucida Grande",Verdana,Helvetica,sans-serif;
+  font-size: 11px;
+    padding-left: 15px;
+
+}
+div.sticky {
+border: 1px #ccc solid;
+}
+#footer-upper {
+border-top:1px solid #DADADA;
+clear:both;
+font-family:'Trebuchet MS','Helvetica Neue',Arial,sans-serif;
+margin:0 auto;
+width:940px;
+}
+#footer-upper div.views-row {
+margin-bottom:10px;
+}
+div#madeby {
+float:right;
+}
+div#madeby img {
+border: none;
+}
+/* =Containers
+--------------------------------------------------------------------------------*/
+
+.container_12,
+.container_16
+{
+	margin-left: auto;
+	margin-right: auto;
+	width: 960px;
+}
+
+/* =Grid >> Global
+--------------------------------------------------------------------------------*/
+
+.grid_1,
+.grid_2,
+.grid_3,
+.grid_4,
+.grid_5,
+.grid_6,
+.grid_7,
+.grid_8,
+.grid_9,
+.grid_10,
+.grid_11,
+.grid_12,
+.grid_13,
+.grid_14,
+.grid_15,
+.grid_16
+{
+	display: inline;
+	float: left;
+	margin-left: 10px;
+	margin-right: 10px;
+}
+
+.container_12 .grid_3,
+.container_16 .grid_4
+{
+	width: 220px;
+}
+
+.container_12 .grid_6,
+.container_16 .grid_8
+{
+	width: 460px;
+/*	width: 460px; */
+}
+
+.container_12 .grid_9,
+.container_16 .grid_12
+{
+	width: 700px;
+}
+
+.container_12 .grid_12,
+.container_16 .grid_16
+{
+	width: 940px;
+}
+
+/* =Grid >> Children (Alpha ~ First, Omega ~ Last)
+--------------------------------------------------------------------------------*/
+
+.alpha
+{
+	width: 180px;
+}
+
+.omega
+{
+	width: 180px;
+}
+
+/* =Grid >> 12 Columns
+--------------------------------------------------------------------------------*/
+
+.container_12 .grid_1
+{
+	width: 60px;
+}
+
+.container_12 .grid_2
+{
+	width: 140px;
+}
+
+.container_12 .grid_4
+{
+	width: 300px;
+}
+
+.container_12 .grid_5
+{
+	width: 380px;
+}
+
+.container_12 .grid_7
+{
+	width: 540px;
+}
+
+.container_12 .grid_8
+{
+	width: 620px;
+}
+
+.container_12 .grid_10
+{
+	width: 780px;
+}
+
+.container_12 .grid_11
+{
+	width: 860px;
+}
+
+/* =Grid >> 16 Columns
+--------------------------------------------------------------------------------*/
+
+.container_16 .grid_1
+{
+	width: 40px;
+}
+
+.container_16 .grid_2
+{
+	width: 100px;
+}
+
+.container_16 .grid_3
+{
+	width: 160px;
+}
+
+.container_16 .grid_5
+{
+	width: 280px;
+}
+
+.container_16 .grid_6
+{
+	width: 340px;
+}
+
+.container_16 .grid_7
+{
+	width: 400px;
+}
+
+.container_16 .grid_9
+{
+	width: 520px;
+}
+
+.container_16 .grid_10
+{
+	width: 580px;
+}
+
+.container_16 .grid_11
+{
+	width: 640px;
+}
+
+.container_16 .grid_13
+{
+	width: 760px;
+}
+
+.container_16 .grid_14
+{
+	width: 820px;
+}
+
+.container_16 .grid_15
+{
+	width: 880px;
+}
+
+/* =Prefix Extra Space >> Global
+--------------------------------------------------------------------------------*/
+
+.container_12 .prefix_3,
+.container_16 .prefix_4
+{
+	padding-left: 240px;
+}
+
+.container_12 .prefix_6,
+.container_16 .prefix_8
+{
+	padding-left: 480px;
+}
+
+.container_12 .prefix_9,
+.container_16 .prefix_12
+{
+	padding-left: 720px;
+}
+
+/* =Prefix Extra Space >> 12 Columns
+--------------------------------------------------------------------------------*/
+
+.container_12 .prefix_1
+{
+	padding-left: 80px;
+}
+
+.container_12 .prefix_2
+{
+	padding-left: 160px;
+}
+
+.container_12 .prefix_4
+{
+	padding-left: 320px;
+}
+
+.container_12 .prefix_5
+{
+	padding-left: 400px;
+}
+
+.container_12 .prefix_7
+{
+	padding-left: 560px;
+}
+
+.container_12 .prefix_8
+{
+	padding-left: 640px;
+}
+
+.container_12 .prefix_10
+{
+	padding-left: 800px;
+}
+
+.container_12 .prefix_11
+{
+	padding-left: 880px;
+}
+
+/* =Prefix Extra Space >> 16 Columns
+--------------------------------------------------------------------------------*/
+
+.container_16 .prefix_1
+{
+	padding-left: 60px;
+}
+
+.container_16 .prefix_2
+{
+	padding-left: 120px;
+}
+
+.container_16 .prefix_3
+{
+	padding-left: 180px;
+}
+
+.container_16 .prefix_5
+{
+	padding-left: 300px;
+}
+
+.container_16 .prefix_6
+{
+	padding-left: 360px;
+}
+
+.container_16 .prefix_7
+{
+	padding-left: 420px;
+}
+
+.container_16 .prefix_9
+{
+	padding-left: 540px;
+}
+
+.container_16 .prefix_10
+{
+	padding-left: 600px;
+}
+
+.container_16 .prefix_11
+{
+	padding-left: 660px;
+}
+
+.container_16 .prefix_13
+{
+	padding-left: 780px;
+}
+
+.container_16 .prefix_14
+{
+	padding-left: 840px;
+}
+
+.container_16 .prefix_15
+{
+	padding-left: 900px;
+}
+
+/* =Suffix Extra Space >> Global
+--------------------------------------------------------------------------------*/
+
+.container_12 .suffix_3,
+.container_16 .suffix_4
+{
+	padding-right: 240px;
+}
+
+.container_12 .suffix_6,
+.container_16 .suffix_8
+{
+	padding-right: 480px;
+}
+
+.container_12 .suffix_9,
+.container_16 .suffix_12
+{
+	padding-right: 720px;
+}
+
+/* =Suffix Extra Space >> 12 Columns
+--------------------------------------------------------------------------------*/
+
+.container_12 .suffix_1
+{
+	padding-right: 80px;
+}
+
+.container_12 .suffix_2
+{
+	padding-right: 160px;
+}
+
+.container_12 .suffix_4
+{
+	padding-right: 320px;
+}
+
+.container_12 .suffix_5
+{
+	padding-right: 400px;
+}
+
+.container_12 .suffix_7
+{
+	padding-right: 560px;
+}
+
+.container_12 .suffix_8
+{
+	padding-right: 640px;
+}
+
+.container_12 .suffix_10
+{
+	padding-right: 800px;
+}
+
+.container_12 .suffix_11
+{
+	padding-right: 880px;
+}
+
+/* =Suffix Extra Space >> 16 Columns
+--------------------------------------------------------------------------------*/
+
+.container_16 .suffix_1
+{
+	padding-right: 60px;
+}
+
+.container_16 .suffix_2
+{
+	padding-right: 120px;
+}
+
+.container_16 .suffix_3
+{
+	padding-right: 180px;
+}
+
+.container_16 .suffix_5
+{
+	padding-right: 300px;
+}
+
+.container_16 .suffix_6
+{
+	padding-right: 360px;
+}
+
+.container_16 .suffix_7
+{
+	padding-right: 420px;
+}
+
+.container_16 .suffix_9
+{
+	padding-right: 540px;
+}
+
+.container_16 .suffix_10
+{
+	padding-right: 600px;
+}
+
+.container_16 .suffix_11
+{
+	padding-right: 660px;
+}
+
+.container_16 .suffix_13
+{
+	padding-right: 780px;
+}
+
+.container_16 .suffix_14
+{
+	padding-right: 840px;
+}
+
+.container_16 .suffix_15
+{
+	padding-right: 900px;
+}
+
+/* =Clear Floated Elements
+--------------------------------------------------------------------------------*/
+
+/* http://sonspring.com/journal/clearing-floats */
+
+html body * span.clear,
+html body * div.clear,
+html body * li.clear,
+html body * dd.clear
+{
+	background: none;
+	border: 0;
+	clear: both;
+	display: block;
+	float: none;
+	font-size: 0;
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	overflow: hidden;
+	visibility: hidden;
+	width: 0;
+	height: 0;
+}
+
+/* http://www.positioniseverything.net/easyclearing.html */
+
+.clearfix:after
+{
+	clear: both;
+	content: '.';
+	display: block;
+	visibility: hidden;
+	height: 0;
+}
+
+.clearfix
+{
+	display: inline-block;
+}
+
+* html .clearfix
+{
+	height: 1%;
+}
+
+.clearfix
+{
+	display: block;
+}

@@ -1,0 +1,79 @@
+<?php
+// $Id: simplenews_roles.test,v 1.1.2.1.2.1 2009/08/18 13:23:19 joachim Exp $
+
+/**
+* Unit tests for Simplenews Roles module.
+*/
+class SimplenewsRolesTestCase extends DrupalWebTestCase {
+  protected $web_user;
+  
+  public function setUp() {
+    parent::setUp('taxonomy', 'simplenews');
+  }
+  
+
+  /**
+   * Drupal SimpleTest method: return metadata about the test.
+   */
+  function getInfo() {
+    return array(
+      'name'  => t('Simplenews Roles'),
+      'description'  => t('Executes test suite for Simplenews Roles module.'),
+      'group' => t('Simplenews'),
+    );
+  }
+  
+  /**
+   * Select randomly one of the available newsletters.
+   * Copied from simplenews.test.
+   *
+   * @return newsletter tid.
+   */
+  function getRandomNewsletter() {
+    if ($taxonomies = taxonomy_get_tree(variable_get('simplenews_vid', ''))) {
+      $tids = array();
+      foreach ($taxonomies as $newsletter) {
+        $tids[] = $newsletter->tid;
+      }
+    $key = array_rand($tids);
+    return $tids[$key];
+    }
+    return 0;
+  }  
+
+  /**
+   * Test role synchronization.
+   */
+  function testRoleSync() {
+    $user = $this->drupalCreateUser($permissions = NULL);
+    
+    // We want the role that's just been created for this user by drupalCreateUser
+    // It's almost certainly role 3.
+    // To be sure we should say array_shift($roles) but STUPID POS PHP resets
+    // numerical keys after an array_shift, WTF.
+    // This should be safe though. Thanks catch!
+    $rid = max(array_keys($user->roles));
+    $rids = array($rid);
+    
+    // Get a newsletter.
+    $tid = $this->getRandomNewsletter();
+    
+    // synchronize the role and the newsletter.
+    simplenews_roles_update_subscriptions($tid, $rids);
+    $this->assertTrue(
+      simplenews_user_is_subscribed($user->mail, $tid, TRUE),
+      t('User with role was automatically subscribed.')
+    );
+    //simplenews_subscribe_user($user->mail, $tid, FALSE, 'test-hand-sub');    
+
+    // Now simulate user unsubscribing themselves.
+    simplenews_unsubscribe_user($user->mail, $tid, FALSE, 'website');
+    
+    // synchronize the role and the newsletter.
+    simplenews_roles_update_subscriptions($tid, $rids);
+    $this->assertFalse(
+      simplenews_user_is_subscribed($user->mail, $tid, TRUE),
+      t('Manually unsubscribed user was not re-subscribed.')
+    );    
+  }
+}

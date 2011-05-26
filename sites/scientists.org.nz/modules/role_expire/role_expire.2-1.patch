@@ -1,0 +1,470 @@
+diff -rupN role_expire_orig/role_expire.install role_expire/role_expire.install
+--- role_expire.install	2010-06-13 22:42:10.000000000 +0200
++++ role_expire.install	2010-06-23 10:40:17.125000000 +0200
+@@ -6,55 +6,69 @@
+  * Role expire install.
+  */
+ 
+-
+ /**
+  * Implementation of hook_schema().
+  */
+ function role_expire_schema() {
+   $schema['role_expire'] = array(
+-    'description' => t('Expiration time for the user roles.'),
++    'description' => 'Expiration time for the user roles.',
+     'fields' => array(
+       'uid' => array(
+         'type' => 'int',
+         'unsigned' => TRUE,
+         'not null' => TRUE,
+-        'description' => t('User ID connected with expiration time.')
++        'description' => 'User ID connected with expiration time.',
+       ),
+       'rid' => array(
+         'type' => 'int',
+         'unsigned' => TRUE,
+         'not null' => TRUE,
+         'default' => 0,
+-        'description' => 'The role ID assigned to the user.',
++        'description' => 'Role ID assigned to the user.',
+       ),
+       'expiry_timestamp' => array(
+         'type' => 'int',
+         'unsigned' => TRUE,
+         'not null' => TRUE,
+         'default' => 0,
+-        'description' => t('Role expiration timestamp.'),
+-      )
++        'description' => 'Role expiration timestamp.',
++      ),
++      'nearend_triggered' => array(
++        'type' => 'int',
++        'size' => 'tiny',
++        'unsigned' => TRUE,
++        'not null' => TRUE,
++        'description' => 'Whether nearend rules event was triggered or not.',
++      ),
+     ),
+     'primary key' => array('uid', 'rid'),
+   );
++
+   $schema['role_expire_length'] = array(
+-    'description' => t('Length in days to assign each role by default.'),
++    'description' => 'Length in days to assign each role by default.',
+     'fields' => array(
+       'rid' => array(
+         'type' => 'int',
+         'unsigned' => TRUE,
+         'not null' => TRUE,
+-        'description' => t('The role_id.')
++        'description' => 'Role ID.',
+       ),
+       'duration' => array(
+         'type' => 'int',
+         'unsigned' => TRUE,
+         'not null' => TRUE,
+-        'description' => t('The default duration for the role.')
++        'description' => 'The default duration for the role.',
++      ),
++      'nearend_days' => array(
++        'type' => 'int',
++        'unsigned' => TRUE,
++        'not null' => TRUE,
++        'description' => 'The number of days before expiration to trigger a rules event.',
+       ),
+     ),
+     'primary key' => array('rid'),
+   );
++
+   return $schema;
+ }
+ 
+@@ -181,3 +195,15 @@ function role_expire_update_6123() {
+   }
+   return $ret;
+ }
++
++/**
++ * Add new fields to handle nearend rules events.
++ */
++function role_expire_update_6124() {
++  $ret = array();
++
++  db_add_field($ret, 'role_expire', 'nearend_triggered', array('type' => 'int', 'size' => 'tiny', 'unsigned' => TRUE, 'not null' => TRUE));
++  db_add_field($ret, 'role_expire_length', 'nearend_days', array('type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE));
++
++  return $ret;
++}
+diff -rupN role_expire_orig/role_expire.module role_expire/role_expire.module
+--- role_expire.module	2010-06-20 22:47:16.000000000 +0200
++++ role_expire.module	2010-06-23 18:18:14.484375000 +0200
+@@ -72,7 +72,6 @@ function role_expire_delete_user_records
+   db_query("DELETE FROM {role_expire} WHERE uid = %d", $uid);
+ }
+ 
+-
+ /**
+  * API function; Insert or update a record in the database.
+  *
+@@ -86,14 +85,13 @@ function role_expire_delete_user_records
+ function role_expire_write_record($uid, $rid, $expiry_timestamp) {
+   $existing = db_result(db_query("SELECT expiry_timestamp FROM {role_expire} WHERE uid = %d AND rid = %d", $uid, $rid));
+   if ($existing && $expiry_timestamp != $existing) {
+-    $result =  db_query("UPDATE {role_expire} SET expiry_timestamp = %d WHERE uid = %d AND rid = %d", $expiry_timestamp, $uid, $rid);
++    $result =  db_query("UPDATE {role_expire} SET expiry_timestamp = %d, nearend_triggered = 0 WHERE uid = %d AND rid = %d", $expiry_timestamp, $uid, $rid);
+   }
+   elseif ($existing == FALSE) {
+     db_query("INSERT INTO {role_expire} (uid, rid, expiry_timestamp) VALUES (%d, %d, %d)", $uid, $rid, $expiry_timestamp);
+   }
+ }
+ 
+-
+ /**
+  * API function; Get all the default duration for a role.
+  * @param $rid
+@@ -102,13 +100,12 @@ function role_expire_write_record($uid, 
+  *  Int storing the default duration days of the role or an empty string if not set.
+  */
+ function role_expire_get_default_duration($rid) {
+-  $result = db_fetch_array(db_query("SELECT duration FROM {role_expire_length} WHERE rid = %d", $rid));
+-  return (!empty($result)) ? $result['duration'] : '';
++  $result = db_result(db_query("SELECT duration FROM {role_expire_length} WHERE rid = %d", $rid));
++  return ($result) ? $result : '';
+ }
+ 
+-
+ /**
+- * API function; Set the default expiry duration for a role.
++ * API function; Set the default expiry duration for a role. Deprecated.
+  *
+  * @param $rid
+  *   Role ID.
+@@ -116,14 +113,14 @@ function role_expire_get_default_duratio
+  *   The duration integer (days).
+  */
+ function role_expire_set_default_duration($rid, $duration) {
+-  $result =  db_query("UPDATE {role_expire_length} SET duration = %d WHERE rid = %d", $duration, $rid);
++  $result = db_query("UPDATE {role_expire_length} SET duration = %d WHERE rid = %d", $duration, $rid);
+   if (!db_affected_rows()) {
+-    db_query("INSERT INTO {role_expire_length} (rid, duration) VALUES (%d, %d)", $rid, $duration);
++    @db_query("INSERT INTO {role_expire_length} (rid, duration) VALUES (%d, %d)", $rid, $duration);
+   }
+ }
+ 
+ /**
+- * API function; Delete a default duration for a role.
++ * API function; Delete a default duration for a role. Deprecated.
+  * @param $rid
+  *   Required. The role_id to remove.
+  */
+@@ -132,6 +129,59 @@ function role_expire_delete_default_dura
+ }
+ 
+ /**
++ * API function; Get the settings for a role.
++ * @param $rid
++ *   Required. Role ID.
++ * @return
++ *  An array of the settings.
++ */
++function role_expire_get_settings($rid) {
++  $settings = db_fetch_array(db_query('SELECT duration, nearend_days FROM {role_expire_length} WHERE rid = %d', $rid));
++  if (empty($settings)) {
++    return array('duration' => 0, 'nearend_days' => 0);
++  }
++  return $settings;
++}
++
++/**
++ * API function; Set settings for a role.
++ *
++ * @param $rid
++ *   Required. Role ID.
++ * @param $settings
++ *   The settings to save.
++ */
++function role_expire_set_settings($rid, $settings) {
++  if (empty($settings)) {
++    return;
++  }
++
++  if (is_numeric($settings)) {
++    $settings = array('duration' => $settings);
++  }
++  $names = array_keys($settings);
++  $sets = array();
++  foreach ($names as $name) {
++    $value = intval($settings[$name]);
++    $sets[] = "$name = $value";
++    $settings[$name] = $value;
++  }
++  db_query('UPDATE {role_expire_length} SET '.implode(', ', $sets).' WHERE rid = %d', $rid);
++  if (!db_affected_rows()) {
++    @db_query('INSERT INTO {role_expire_length} (rid, '.implode(', ', $names).') VALUES (%d, '.implode(', ', array_values($settings)).')', $rid);
++  }
++}
++
++/**
++ * API function; Delete settings for a role.
++ * @param $rid
++ *   Required. Role ID.
++ */
++function role_expire_delete_settings($rid) {
++  db_query('DELETE FROM {role_expire_length} WHERE rid = %d', $rid);
++}
++
++/**
+  * API function; Get all records that should be expired.
+  *
+  * @param $time
+@@ -155,6 +205,15 @@ function role_expire_get_expired($time =
+  ******************************************************************************/
+ 
+ /**
++ * Implementation of hook_init().
++ */
++function role_expire_init() {
++  if (module_exists('token')) {
++    require_once dirname(__FILE__).'/role_expire.token.inc';
++  }
++}
++
++/**
+  * Implementation of hook_views_api().
+  */
+ function role_expire_views_api() {
+@@ -195,16 +254,28 @@ function role_expire_form_user_profile_f
+  * Implementation of hook_form_FORM-ID_alter().
+  */
+ function role_expire_form_user_admin_role_alter(&$form, $form_state) {
++  $settings = role_expire_get_settings($form['rid']['#value']);
+   $form['role_expire'] = array(
+-    '#title' => t("Default day length for the role %role",
++    '#title' => t("Role default day length for the role %role",
+       array('%role' => drupal_ucfirst($form['name']['#default_value']))),
+     '#type' => 'textfield',
+     '#size' => 8,
+-    '#default_value' => role_expire_get_default_duration($form['rid']['#value']),
++    '#default_value' => ($settings['duration']) ? $settings['duration'] : '',
+     '#maxlength' => 5,
+     '#attributes' => array('class' => 'role-expire-role-expiry'),
+     '#description' => t("Leave blank for no default length. Values should indicate the number of days the role should be active for.")
+   );
++  if (module_exists('rules')) {
++    $form['role_expire_nearend_days'] = array(
++      '#title' => t('Number of days before role expiration to trigger a rules event'),
++      '#type' => 'textfield',
++      '#size' => 8,
++      '#default_value' => ($settings['nearend_days']) ? $settings['nearend_days'] : '',
++      '#maxlength' => 5,
++      '#attributes' => array('class' => 'role-expire-role-expiry'),
++      '#description' => t('Leave blank not to trigger any rules event before role expiration.'),
++    );
++  }
+   // Reposition the submit button and delete.
+   $form['submit']['#weight'] = 2;
+   if (arg(4)) {
+@@ -215,17 +286,29 @@ function role_expire_form_user_admin_rol
+ }
+ 
+ function role_expire_user_admin_role_validate($form, &$form_state) {
+-  if (isset($form_state['values']['role_expire']) && strlen($form_state['values']['role_expire']) && !is_numeric($form_state['values']['role_expire'])) {
+-    form_set_error('role_expire', 'Role expiry defaults needs to be numeric');
++  $values = $form_state['values'];
++
++  foreach (array('role_expire', 'role_expire_nearend_days') as $name) {
++    if (isset($values[$name]) && strlen($values[$name]) && (!is_numeric($values[$name]) || $values[$name] < 0)) {
++      form_error($form[$name], t('!name needs to be a positive numeric value.', array('!name' => $form[$name]['#title'])));
++    }
+   }
+ }
+ 
+ function role_expire_user_admin_role_submit($form, &$form_state) {
+-  if ($form_state['values']['op'] == t('Delete role')) {
+-    role_expire_delete_default_duration($form_state['values']['rid']);
++  $values = $form_state['values'];
++
++  if ($values['op'] == t('Delete role')) {
++    role_expire_delete_settings($values['rid']);
+   }
+   else {
+-    role_expire_set_default_duration($form_state['values']['rid'], $form_state['values']['role_expire']);
++    $settings = array();
++    foreach (array('role_expire' => 'duration', 'role_expire_nearend_days' => 'nearend_days') as $name => $setting_name) {
++      if (isset($values[$name])) {
++        $settings[$setting_name] = $values[$name];
++      }
++    }
++    role_expire_set_settings($values['rid'], $settings);
+     drupal_set_message('Role expiry set.');
+   }
+ }
+@@ -303,7 +386,7 @@ function role_expire_user($op, &$edit, &
+             }
+             else {
+               // User input is blank, so delete record.
+-              role_expire_delete_record($account->uid, $rid);          
++              role_expire_delete_record($account->uid, $rid);
+             }
+           }
+         }
+@@ -356,27 +439,62 @@ function role_expire_user($op, &$edit, &
+  * Implementation of hook_cron().
+  */
+ function role_expire_cron() {
++  $rules_exists = module_exists('rules');
++  $now = time();
++
++  // Remove expired roles.
+   if ($expires = role_expire_get_expired()) {
+     $roles = _role_expire_get_role();
+     foreach ($expires as $expire) {
+ 
++      // Remove the role expiration record.
++      role_expire_delete_record($expire['uid'], $expire['rid']);
++
+       // Remove the role from the user.
++      unset($account);
+       $account = user_load($expire['uid']);
+       $edit = $account->roles;
+-      unset($edit[$expire['rid']]);
+-      // In the documentation for the role_expire implementation of hook_user we
+-      // state to use $category = 'account'.  We don't do that here because
+-      // that would cause the delete to occur twice.
+-      user_save($account, array('roles' => $edit), NULL);
++      if (array_key_exists($expire['rid'], $edit)) {
++        unset($edit[$expire['rid']]);
++        // In the documentation for the role_expire implementation of hook_user we
++        // state to use $category = 'account'.  We don't do that here because
++        // that would cause the delete to occur twice.
++        user_save($account, array('roles' => $edit), NULL);
++        watchdog('role expire', 'Remove role @role from user @account.', array('@role' => $roles[$expire['rid']], '@account' => $account->name));
++
++        // Trigger a role expired rule event.
++        if ($rules_exists) {
++          rules_invoke_event('role_expire_expired', array(
++            'account' => &$account,
++            'role' => (object)array('rid' => $expire['rid'], 'name' => $roles[$expire['rid']], 'expiry_timestamp' => $now, 'nearend_days' => 0),
++          ));
++        }
++      }
++    }
++  }
+ 
+-      // Remove the role expiration record.
+-      role_expire_delete_record($expire['uid'], $expire['rid']);
+-      watchdog('role expire', 'Remove role @role from user @account.', array('@role' => $roles[$expire['rid']], '@account' => $account->name));
++  // Trigger nearend rules events.
++  if ($rules_exists) {
++    $sel = '{users} u
++      INNER JOIN {users_roles} ur ON ur.uid = u.uid
++      INNER JOIN {role_expire} re ON re.uid = ur.uid AND re.rid = ur.rid AND re.nearend_triggered = 0
++      INNER JOIN {role_expire_length} rel ON rel.rid = re.rid AND rel.nearend_days > 0
++      AND re.expiry_timestamp - %d < rel.nearend_days * 86400';
++    $result = db_query("SELECT re.uid, re.rid, re.expiry_timestamp, rel.nearend_days FROM $sel", $now);
++    $update = FALSE;
++    while ($role = db_fetch_object($result)) {
++      unset($account);
++      $account = user_load($role->uid);
++      $role->name = $account->roles[$role->rid];
++      rules_invoke_event('role_expire_nearend', array('account' => &$account, 'role' => $role));
++      $update = TRUE;
++    }
++    if ($update) {
++      db_query("UPDATE $sel SET re.nearend_triggered = 1", $now);
+     }
+   }
+ }
+ 
+-
+ /**
+  * Add form element that accepts the role expiration time.
+  *
+diff -rupN role_expire_orig/role_expire.rules.inc role_expire/role_expire.rules.inc
+--- role_expire.rules.inc	2010-03-07 20:23:52.000000000 +0100
++++ role_expire.rules.inc	2010-06-23 14:50:30.046875000 +0200
+@@ -7,6 +7,41 @@
+  */
+ 
+ /**
++ * Implementation of hook_rules_event_info().
++ */
++function role_expire_rules_event_info() {
++  return array(
++    'role_expire_expired' => array(
++      'label' => t('Role has expired'),
++      'module' => 'Role Expire',
++      'arguments' => array(
++        'account' => array('type' => 'user', 'label' => t('user whose role has expired')),
++        'role' => array('type' => 'role_expire_role', 'label' => t('expired role')),
++      ),
++    ),
++    'role_expire_nearend' => array(
++      'label' => t('Role is about to expire'),
++      'module' => 'Role Expire',
++      'arguments' => array(
++        'account' => array('type' => 'user', 'label' => t('user whose role is about to expire')),
++        'role' => array('type' => 'role_expire_role', 'label' => t('role about to expire')),
++      ),
++    ),
++  );
++}
++
++/**
++ * Implementation of hook_rules_data_type_info().
++ */
++function role_expire_rules_data_type_info() {
++  return array(
++    'role_expire_role' => array(
++      'label' => t('role'),
++    ),
++  );
++}
++
++/**
+  * Implementation of hook_rules_action_info().
+  */
+ function role_expire_rules_action_info() {
+diff -rupN role_expire_orig/role_expire.token.inc role_expire/role_expire.token.inc
+--- role_expire.token.inc	1970-01-01 01:00:00.000000000 +0100
++++ role_expire.token.inc	2010-06-23 17:24:19.734375000 +0200
+@@ -0,0 +1,37 @@
++<?php
++//$Id$
++
++/**
++ * @file
++ * Token module integration.
++ */
++
++/**
++ * Implementation of hook_token_values().
++ */
++function role_expire_token_values($type, $object = NULL) {
++  $values = array();
++  if ($type == 'role_expire_role') {
++    $values['rid']  = $object->rid;
++    $values['name'] = $object->name;
++    $tz = variable_get('date_default_timezone', 0);
++    $values['expiry-date'] = format_date($object->expiry_timestamp, 'small', '', $tz);
++    $values += token_get_date_token_values($object->expiry_timestamp, 'expiry-date-');
++    $values['nearend-days'] = $object->nearend_days;
++  }
++  return $values;
++}
++
++/**
++ * Implementation of hook_token_list().
++ */
++function role_expire_token_list($type = 'all') {
++  if ($type == 'role_expire_role' || $type == 'all') {
++    $tokens['role_expire_role']['rid']  = t('Role ID');
++    $tokens['role_expire_role']['name'] = t('Role name');
++    $tokens['role_expire_role']['expiry-date'] = t('Role expiration date');
++    $tokens['role_expire_role'] += token_get_date_token_info(t('Role expiration'), 'expiry-date-');
++    $tokens['role_expire_role']['nearend-days'] = t('Number of days before role expiration');
++  }
++  return $tokens;
++}
+\ No newline at end of file

@@ -1,0 +1,13 @@
+; $Id: simplenews_test.info,v 1.1.2.1 2010/04/17 10:35:48 sutharsan Exp $
+name = Simplenews test
+description = Simplenews helper module for test framework. Do not use in a production environment!
+dependencies[] = simplenews
+package = Mail
+core = 6.x
+
+; Information added by drupal.org packaging script on 2010-07-11
+version = "6.x-2.x-dev"
+core = "6.x"
+project = "simplenews"
+datestamp = "1278835665"
+
