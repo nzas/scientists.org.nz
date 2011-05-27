@@ -272,29 +272,34 @@ width: 22px;
 div#sidebars div#loginblock {
 margin: 0px;
 position: absolute;
-top: 78px;
+top: 56px;
 }
 
 div#sidebars div#loginblock div {
 font-family: Georgia,'Times New Roman',Times,serif;
 font-size: 1.6em;
 font-weight: bold;
-height: 40px;
+/*height: 40px;
 padding: 17px 8px 0 62px;
-margin: 4px 0 0px 2px;
-
+margin: 4px 0 0px 2px; */
 }
+
 div#sidebars div#loginblock div#join {
 background:url("../images/join.gif") 1px 2px;
 background-repeat:no-repeat;
 }
 div#sidebars div#loginblock div#login {
-color:#80c026;
-background:url("../images/in.gif") 1px 2px;
-background-repeat:no-repeat;
+color:#c94807;
+position: absolute;
+top: 25px;
+left: 150px;
+/*background:url("../images/in.gif") 1px 2px;
+background-repeat:no-repeat;*/
 }
 div#sidebars div#loginblock div#login a {
-color:#80c026;
+color:#c94807;
+position: absolute;
+top: 0px;
 }
 div#sidebars div.view-comments-recent div.views-row {
 padding: 0 8px 0 21px;

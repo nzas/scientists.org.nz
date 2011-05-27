@@ -143,7 +143,7 @@ small {
 
 /* Images */
 #content-wrapper img, #footer-wrapper img {
-  background: #FAFAFA;
+  /*background: #FAFAFA;*/
   /*border: 1px solid #DCDCDC;
   padding: 1px;*/
 }
