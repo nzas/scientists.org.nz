@@ -60,7 +60,29 @@
        <?php if (!empty($tabs)): ?><div class="tabs"><?php print $tabs; ?></div><?php endif; ?>--> 
         <?php if (!empty($messages)): print $messages; endif; ?>
         <?php if (!empty($help)): print $help; endif; ?>
-        <div id="content-output"> 
+        <div id="content-output">
+<h1 class="title" id="page-title">Join NZAS</h1>
+<p> 
+Your membership helps support the advocacy of science in New Zealand. As a member of the NZAS you also receive:<br />
+<ul>
+<li>New Zealand Science Review, the official publication of the association, </li>
+<li>an optional profile on scientists.org.nz,</li>
+<li>representation before government, and other relevant groups, on issues of importance to scientists, and </li>
+<li> opportunities for participation in discussion on issues relating to New Zealand science.</li>
+</ul>
+</p>
+<p>
+Membership fees are:<br />
+<ul>
+<li>$65.00 for individuals; </li>
+<li>$75.00 for joint members; </li>
+<li>$42.00 for students, the unwaged or retired; </li>
+<li>$121.00 for corporate membership (receive 2 copies of NZSR). </li>
+</ul>
+</p>
+<p>
+Further information on membership of the NZAS may be obtained by contacting the membership secretary by email (membership@scientists.org.nz), or by writing to the New Zealand Association of Scientists, P.O. Box 1874, Wellington. To join now please complete the following information:
+</p> 
           <?php print $content; ?>
         </div><!-- /#content-output -->
       </div>
