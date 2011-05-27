@@ -72,7 +72,7 @@ Your membership helps support the advocacy of science in New Zealand. As a membe
 </ul>
 </p>
 <p>
-Membership fees are:<br />
+Annual membership fees are:<br />
 <ul>
 <li>$65.00 for individuals; </li>
 <li>$75.00 for joint members; </li>
