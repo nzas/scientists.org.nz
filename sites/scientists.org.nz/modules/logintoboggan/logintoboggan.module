@@ -824,8 +824,8 @@ function logintoboggan_denied() {
     // the user that they were denied access.
     menu_set_active_item('user');
     $return = menu_execute_active_handler();
-    drupal_set_title(t('Access Denied / User Login'));
-    drupal_set_message(t('Access denied.  You may need to login below or register to access this page.'), 'error');
+    drupal_set_title(t('Login'));
+    drupal_set_message(t('Please login.'), 'error');
   }
   else {
     drupal_set_title(t('Access Denied'));
