@@ -61,6 +61,7 @@
         <?php if (!empty($messages)): print $messages; endif; ?>
         <?php if (!empty($help)): print $help; endif; ?>
         <div id="content-output">
+<!--
 <h1 class="title" id="page-title">Join NZAS</h1>
 <p> 
 Your membership helps support the advocacy of science in New Zealand. As a member of the NZAS you also receive:<br />
@@ -82,6 +83,10 @@ Annual membership fees are:<br />
 </p>
 <p>
 Further information on membership of the NZAS may be obtained by contacting the membership secretary by email (membership@scientists.org.nz), or by writing to the New Zealand Association of Scientists, P.O. Box 1874, Wellington. To join now please complete the following information:
+</p>
+-->
+<p>
+Please complete the following information:
 </p> 
           <?php print $content; ?>
         </div><!-- /#content-output -->
